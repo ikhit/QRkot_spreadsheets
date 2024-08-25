@@ -1,12 +1,17 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from aiogoogle import Aiogoogle
 
 from app.core.config import settings
 
+
 async def set_user_permissions(
     spreadsheetid: str, wrapper_services: Aiogoogle
 ) -> None:
+    """
+    Выдать права аккаунту для работы с таблицами,
+    которые находятся на диске сервисного аккаунта.
+    """
     permissions_body = {
         "type": "user",
         "role": "writer",
@@ -24,6 +29,7 @@ async def set_user_permissions(
 
 
 async def spreadsheets_create(wrapper_services: Aiogoogle) -> str:
+    """Создать Google-таблицу и вернуть ее id."""
     service = await wrapper_services.discover(
         "sheets",
         settings.GOOGLE_SHEETS_API_VERSION,
@@ -46,6 +52,7 @@ async def spreadsheets_update_value(
     charity_projects: list[tuple[str]],
     wrapper_services: Aiogoogle,
 ) -> None:
+    """Обновить данные в Google-таблице."""
     now_date_time = datetime.now().strftime(settings.DATETIME_FORMAT)
     service = await wrapper_services.discover(
         "sheets",
@@ -57,9 +64,12 @@ async def spreadsheets_update_value(
         ["Название проекта", "Время сбора", "Описание"],
     ]
     for project in charity_projects:
-        new_row = [*project]
+        new_row = [
+            project["name"],
+            str(timedelta(days=project["completion_rate"])),
+            project["description"],
+        ]
         table_values.append(new_row)
-
     update_body = {
         "majorDimension": "ROWS",
         "values": table_values,

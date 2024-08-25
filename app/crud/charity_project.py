@@ -1,6 +1,7 @@
+from datetime import timedelta
 from typing import Optional, Union
 
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.crud.base import CRUDBase
@@ -23,16 +24,26 @@ class CRUDCharityProject(CRUDBase):
 
     async def get_projects_by_completion_rate(
         self, session: AsyncSession
-    ) -> Union[None, list[tuple[str]]]:
+    ) -> Union[None, list[tuple[str, timedelta]]]:
+        """
+        Вернуть список всех закрытых проектов,
+        отсортированных по скорости закрытия проекта.
+        """
         closed_projects = await session.execute(
-            select(CharityProject).where(CharityProject.fully_invested)
+            select(
+                [
+                    CharityProject.name,
+                    (
+                        func.julianday(CharityProject.close_date) -
+                        func.julianday(CharityProject.create_date)
+                    ).label("completion_rate"),
+                    CharityProject.description,
+                ]
+            )
+            .where(CharityProject.fully_invested)
+            .order_by("completion_rate")
         )
-        closed_projects = closed_projects.scalars().all()
-        complection_rate_list = []
-        for project in closed_projects:
-            time_delta = project.close_date - project.create_date
-            complection_rate_list.append((project.name, str(time_delta), project.description))
-        return complection_rate_list
+        return closed_projects.all()
 
 
 charity_project_crud = CRUDCharityProject(CharityProject)
