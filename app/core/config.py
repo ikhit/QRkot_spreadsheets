@@ -1,10 +1,6 @@
-import os
 from typing import Optional
 
 from pydantic import BaseSettings, EmailStr
-from dotenv import load_dotenv
-
-load_dotenv()
 
 
 class Settings(BaseSettings):
@@ -42,7 +38,6 @@ class Settings(BaseSettings):
     USER_PERMISSIONS_BODY: dict = {
         "type": "user",
         "role": "writer",
-        "emailAddress": os.environ["EMAIL"],
     }
     DATETIME_FORMAT = "%Y/%m/%d %H:%M:%S"
     GOOGLE_TABLE_ROW_COUNT: int = 100

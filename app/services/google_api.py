@@ -33,6 +33,11 @@ async def set_user_permissions(
     Выдать права аккаунту для работы с таблицами,
     которые находятся на диске сервисного аккаунта.
     """
+    settings.USER_PERMISSIONS_BODY.update(
+        {
+            "emailAddress": settings.email,
+        }
+    )
     service = await wrapper_services.discover(
         "drive",
         settings.GOOGLE_DRIVE_API_VERSION,
