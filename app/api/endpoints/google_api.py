@@ -17,7 +17,7 @@ router = APIRouter()
 
 @router.post(
     "/",
-    response_model=list,
+    response_model=str,
     dependencies=[Depends(current_superuser)],
 )
 async def get_report(
@@ -38,6 +38,9 @@ async def get_report(
             charity_projects,
             wrapper_services,
         )
-    except HTTPException as error:
-        raise error
+    except ValueError as error:
+        raise HTTPException(
+            status_code=400,
+            detail=error,
+        )
     return spreadsheet_url

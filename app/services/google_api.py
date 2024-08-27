@@ -1,7 +1,6 @@
 from datetime import datetime, timedelta
 
 from aiogoogle import Aiogoogle
-from fastapi import HTTPException
 
 from app.core.config import settings
 
@@ -13,12 +12,11 @@ def get_table_range(table_values: list[list[str]]) -> str:
     last_row = len(table_values)
     last_column_index = max([len(cell) for cell in table_values])
     if (
-        last_row > settings.GOOGLE_TABLE_ROW_COUNT
-        or last_column_index > settings.GOOGLE_TABLE_COLUMN_COUNT
+        last_row > settings.GOOGLE_TABLE_ROW_COUNT or
+        last_column_index > settings.GOOGLE_TABLE_COLUMN_COUNT
     ):
-        raise HTTPException(
-            status_code=400,
-            detail="Количество данных в отчёте превышает размеры таблицы!",
+        raise ValueError(
+            "Количество данных в отчёте превышает размеры таблицы!",
         )
     last_column = chr(settings.COLUMN_INDEX_BASE + last_column_index)
     return (
